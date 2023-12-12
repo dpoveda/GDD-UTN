@@ -15,8 +15,18 @@ begin
 			join STOCK s on d.prod_codigo = s.stoc_producto
 		where s.stoc_cantidad > 0
 	)
-	rollback transaction
-	print 'No se pudo eliminar el articulo pues este aun tiene stock'
+		begin
+			rollback transaction
+			print 'No se pudo eliminar el articulo pues este aun tiene stock'
+		end
+	else 
+		begin
+			DELETE FROM stock 
+			WHERE stoc_producto in (select d.prod_codigo from deleted d);
+
+			DELETE FROM Producto 
+			WHERE prod_codigo in (select d.prod_codigo from deleted d);	
+		end
 
 end
 
@@ -27,6 +37,17 @@ end
 select * from stock
 where stoc_producto = '00000030'
 order by stoc_cantidad 
+
+
+select * from producto
+where prod_codigo = '00000030'
+
+select * from Item_Factura
+where item_producto = '00000030'
+
+update stock 
+set stoc_cantidad = 0 
+where stoc_producto = '00000030'
 
 DELETE FROM Producto
 WHERE prod_codigo = '00000030';
